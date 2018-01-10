@@ -31,6 +31,15 @@ export class Enemy extends Phaser.Sprite {
 
     this.play('getHit');
 
+    if (this.health <= 0) {
+      const emitter = this.game.add.emitter(this.x, this.y, 100);
+      emitter.makeParticles('enemyParticle');
+      emitter.minParticleSpeed.setTo(-200);
+      emitter.maxParticleSpeed.setTo(200);
+      emitter.gravity.setTo(0);
+      emitter.start(true, 500, undefined, 100);
+    }
+
     return this;
   }
 }
