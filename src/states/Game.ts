@@ -6,6 +6,7 @@ export class Game extends Phaser.State {
   private readonly BULLET_SPEED = -1000;
   private background: Phaser.TileSprite;
   private enemies: Phaser.Group;
+  private enemyBullets: Phaser.Group;
   private player: Phaser.Sprite;
   private playerBullets: Phaser.Group;
   private shootingTimer: Phaser.TimerEvent;
@@ -43,6 +44,8 @@ export class Game extends Phaser.State {
   public update() {
     this.physics.arcade.overlap(this.playerBullets, this.enemies, this.damageEnemy, undefined, this);
 
+    this.physics.arcade.overlap(this.enemyBullets, this.player, this.killPlayer, undefined, this);
+
     (this.player.body as Phaser.Physics.Arcade.Body).velocity.x = 0;
 
     if (this.input.activePointer.isDown) {
@@ -76,7 +79,10 @@ export class Game extends Phaser.State {
     this.enemies = this.add.group();
     this.enemies.enableBody = true;
 
-    const enemy = new Enemy(this.game, 100, 100, 'greenEnemy', 10, []);
+    this.enemyBullets = this.add.group();
+    this.enemyBullets.enableBody = true;
+
+    const enemy = new Enemy(this.game, 100, 100, 'greenEnemy', 10, this.enemyBullets);
     this.enemies.add(enemy);
 
     enemy.body.velocity.x = 100;
@@ -86,5 +92,11 @@ export class Game extends Phaser.State {
   private damageEnemy(bullet: Phaser.Sprite, enemy: Phaser.Sprite) {
     enemy.damage(1);
     bullet.kill();
+  }
+
+  private killPlayer(bullet: Phaser.Sprite, player: Phaser.Sprite) {
+    player.kill();
+    bullet.kill();
+    this.state.start('Game');
   }
 }
