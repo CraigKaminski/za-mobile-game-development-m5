@@ -1,9 +1,11 @@
+import { Enemy } from '../prefabs/Enemy';
 import { PlayerBullet } from '../prefabs/PlayerBullet';
 
 export class Game extends Phaser.State {
   private readonly PLAYER_SPEED = 200;
   private readonly BULLET_SPEED = -1000;
   private background: Phaser.TileSprite;
+  private enemies: Phaser.Group;
   private player: Phaser.Sprite;
   private playerBullets: Phaser.Group;
   private shootingTimer: Phaser.TimerEvent;
@@ -34,9 +36,13 @@ export class Game extends Phaser.State {
 
     this.initBullets();
     this.shootingTimer = this.time.events.loop(Phaser.Timer.SECOND / 5, this.createPlayerBullet, this);
+
+    this.initEnemies();
   }
 
   public update() {
+    this.physics.arcade.overlap(this.playerBullets, this.enemies, this.damageEnemy, undefined, this);
+
     (this.player.body as Phaser.Physics.Arcade.Body).velocity.x = 0;
 
     if (this.input.activePointer.isDown) {
@@ -64,5 +70,21 @@ export class Game extends Phaser.State {
     }
 
     bullet.body.velocity.y = this.BULLET_SPEED;
+  }
+
+  private initEnemies() {
+    this.enemies = this.add.group();
+    this.enemies.enableBody = true;
+
+    const enemy = new Enemy(this.game, 100, 100, 'greenEnemy', 10, []);
+    this.enemies.add(enemy);
+
+    enemy.body.velocity.x = 100;
+    enemy.body.velocity.y = 50;
+  }
+
+  private damageEnemy(bullet: Phaser.Sprite, enemy: Phaser.Sprite) {
+    enemy.damage(1);
+    bullet.kill();
   }
 }
