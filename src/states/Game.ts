@@ -44,6 +44,9 @@ export class Game extends Phaser.State {
     this.load.spritesheet('yellowEnemy', 'images/yellow_enemy.png', 50, 46, 3, 1, 1);
     this.load.spritesheet('redEnemy', 'images/red_enemy.png', 50, 46, 3, 1, 1);
     this.load.spritesheet('greenEnemy', 'images/green_enemy.png', 50, 46, 3, 1, 1);
+    this.load.text('level1', 'data/level1.json');
+    this.load.text('level2', 'data/level2.json');
+    this.load.text('level3', 'data/level3.json');
   }
 
   public create() {
@@ -136,50 +139,9 @@ export class Game extends Phaser.State {
   private loadLevel() {
     this.currentEnemyIndex = 0;
 
-    this.levelData = {
-      duration: 5,
-      enemies: [
-        {
-          time: 1,
-          x: 0.05,
-          health: 6,
-          speedX: 20,
-          speedY: 50,
-          key: 'greenEnemy',
-          scale: 3,
-        },
-        {
-          time: 2,
-          x: 0.1,
-          health: 3,
-          speedX: 50,
-          speedY: 50,
-          key: 'greenEnemy',
-          scale: 1,
-        },
-        {
-          time: 3,
-          x: 0.1,
-          health: 3,
-          speedX: 50,
-          speedY: 50,
-          key: 'greenEnemy',
-          scale: 1,
-        },
-        {
-          time: 4,
-          x: 0.1,
-          health: 3,
-          speedX: 50,
-          speedY: 50,
-          key: 'greenEnemy',
-          scale: 1,
-        },
-      ],
-    };
+    this.levelData = JSON.parse(this.game.cache.getText('level' + this.currentLevel));
 
     this.endOfLevelTimer = this.time.events.add(this.levelData.duration * 1000, () => {
-      console.log('level ended!');
 
       if (this.currentLevel < this.numLevels) {
         this.currentLevel++;
