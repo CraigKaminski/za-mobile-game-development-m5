@@ -47,7 +47,7 @@ export class Enemy extends Phaser.Sprite {
       emitter.gravity.setTo(0);
       emitter.start(true, 500, undefined, 100);
 
-      this.enemyTimer.stop(true);
+      this.enemyTimer.pause();
     }
 
     return this;
@@ -78,6 +78,8 @@ export class Enemy extends Phaser.Sprite {
       this.body.velocity.y = speedY;
     }
 
+    this.enemyTimer.resume();
+    
     return this;
   }
 
