@@ -5,8 +5,22 @@ export class Game extends Phaser.State {
   private readonly PLAYER_SPEED = 200;
   private readonly BULLET_SPEED = -1000;
   private background: Phaser.TileSprite;
+  private currentEnemyIndex: number;
   private enemies: Phaser.Group;
   private enemyBullets: Phaser.Group;
+  private levelData: {
+    duration: number,
+    enemies: Array<{
+      time: number,
+      x: number,
+      health: number,
+      speedX: number,
+      speedY: number,
+      key: string,
+      scale: number,
+    }>,
+  };
+  private nextEnemyTimer: Phaser.TimerEvent;
   private player: Phaser.Sprite;
   private playerBullets: Phaser.Group;
   private shootingTimer: Phaser.TimerEvent;
@@ -39,6 +53,8 @@ export class Game extends Phaser.State {
     this.shootingTimer = this.time.events.loop(Phaser.Timer.SECOND / 5, this.createPlayerBullet, this);
 
     this.initEnemies();
+
+    this.loadLevel();
   }
 
   public update() {
@@ -81,12 +97,6 @@ export class Game extends Phaser.State {
 
     this.enemyBullets = this.add.group();
     this.enemyBullets.enableBody = true;
-
-    const enemy = new Enemy(this.game, 100, 100, 'greenEnemy', 10, this.enemyBullets);
-    this.enemies.add(enemy);
-
-    enemy.body.velocity.x = 100;
-    enemy.body.velocity.y = 50;
   }
 
   private damageEnemy(bullet: Phaser.Sprite, enemy: Phaser.Sprite) {
@@ -98,5 +108,91 @@ export class Game extends Phaser.State {
     player.kill();
     bullet.kill();
     this.state.start('Game');
+  }
+
+  private createEnemy(x: number,
+                      y: number,
+                      health: number,
+                      key: string,
+                      scale: number,
+                      speedX: number,
+                      speedY: number) {
+    let enemy: Enemy = this.enemies.getFirstExists(false);
+
+    if (!enemy) {
+      enemy = new Enemy(this.game, x, y, key, health, this.enemyBullets);
+      this.enemies.add(enemy);
+    }
+
+    enemy.reset(x, y, health, key, scale, speedX, speedY);
+  }
+
+  private loadLevel() {
+    this.currentEnemyIndex = 0;
+
+    this.levelData = {
+      duration: 35,
+      enemies: [
+        {
+          time: 1,
+          x: 0.05,
+          health: 6,
+          speedX: 20,
+          speedY: 50,
+          key: 'greenEnemy',
+          scale: 3,
+        },
+        {
+          time: 2,
+          x: 0.1,
+          health: 3,
+          speedX: 50,
+          speedY: 50,
+          key: 'greenEnemy',
+          scale: 1,
+        },
+        {
+          time: 3,
+          x: 0.1,
+          health: 3,
+          speedX: 50,
+          speedY: 50,
+          key: 'greenEnemy',
+          scale: 1,
+        },
+        {
+          time: 4,
+          x: 0.1,
+          health: 3,
+          speedX: 50,
+          speedY: 50,
+          key: 'greenEnemy',
+          scale: 1,
+        },
+      ],
+    };
+
+    this.scheduleNextEnemy();
+  }
+
+  private scheduleNextEnemy() {
+    const nextEnemy = this.levelData.enemies[this.currentEnemyIndex];
+
+    if (nextEnemy) {
+      const nextTime = 1000 *
+        (nextEnemy.time - (this.currentEnemyIndex === 0 ? 0 : this.levelData.enemies[this.currentEnemyIndex - 1].time));
+
+      this.nextEnemyTimer = this.time.events.add(nextTime, () => {
+        this.createEnemy(nextEnemy.x * this.world.width,
+                         -100, nextEnemy.health,
+                         nextEnemy.key,
+                         nextEnemy.scale,
+                         nextEnemy.speedX,
+                         nextEnemy.speedY);
+
+        this.currentEnemyIndex++;
+        this.scheduleNextEnemy();
+      });
+    }
   }
 }

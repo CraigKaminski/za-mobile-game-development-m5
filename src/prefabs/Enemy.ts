@@ -79,7 +79,7 @@ export class Enemy extends Phaser.Sprite {
     }
 
     this.enemyTimer.resume();
-    
+
     return this;
   }
 
