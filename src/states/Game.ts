@@ -6,6 +6,8 @@ export class Game extends Phaser.State {
   private readonly BULLET_SPEED = -1000;
   private background: Phaser.TileSprite;
   private currentEnemyIndex: number;
+  private currentLevel: number;
+  private endOfLevelTimer: Phaser.TimerEvent;
   private enemies: Phaser.Group;
   private enemyBullets: Phaser.Group;
   private levelData: {
@@ -21,13 +23,17 @@ export class Game extends Phaser.State {
     }>,
   };
   private nextEnemyTimer: Phaser.TimerEvent;
+  private numLevels: number;
   private player: Phaser.Sprite;
   private playerBullets: Phaser.Group;
   private shootingTimer: Phaser.TimerEvent;
 
-  public init() {
+  public init(currentLevel: number) {
     this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     this.physics.startSystem(Phaser.Physics.ARCADE);
+
+    this.numLevels = 3;
+    this.currentLevel = currentLevel ? currentLevel : 1;
   }
 
   public preload() {
@@ -131,7 +137,7 @@ export class Game extends Phaser.State {
     this.currentEnemyIndex = 0;
 
     this.levelData = {
-      duration: 35,
+      duration: 5,
       enemies: [
         {
           time: 1,
@@ -172,6 +178,17 @@ export class Game extends Phaser.State {
       ],
     };
 
+    this.endOfLevelTimer = this.time.events.add(this.levelData.duration * 1000, () => {
+      console.log('level ended!');
+
+      if (this.currentLevel < this.numLevels) {
+        this.currentLevel++;
+      } else {
+        this.currentLevel = 1;
+      }
+
+      this.state.start('Game', true, false, this.currentLevel);
+    }, this);
     this.scheduleNextEnemy();
   }
 
