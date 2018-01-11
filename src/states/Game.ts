@@ -24,6 +24,7 @@ export class Game extends Phaser.State {
   };
   private nextEnemyTimer: Phaser.TimerEvent;
   private numLevels: number;
+  private orchestra: Phaser.Sound;
   private player: Phaser.Sprite;
   private playerBullets: Phaser.Group;
   private shootingTimer: Phaser.TimerEvent;
@@ -47,6 +48,7 @@ export class Game extends Phaser.State {
     this.load.text('level1', 'data/level1.json');
     this.load.text('level2', 'data/level2.json');
     this.load.text('level3', 'data/level3.json');
+    this.load.audio('orchestra', ['audio/8bit-orchestra.mp3', 'audio/8bit-orchestra.ogg']);
   }
 
   public create() {
@@ -64,6 +66,9 @@ export class Game extends Phaser.State {
     this.initEnemies();
 
     this.loadLevel();
+
+    this.orchestra = this.add.audio('orchestra');
+    this.orchestra.play();
   }
 
   public update() {
@@ -116,6 +121,7 @@ export class Game extends Phaser.State {
   private killPlayer(bullet: Phaser.Sprite, player: Phaser.Sprite) {
     player.kill();
     bullet.kill();
+    this.orchestra.stop();
     this.state.start('Game');
   }
 
@@ -142,6 +148,7 @@ export class Game extends Phaser.State {
     this.levelData = JSON.parse(this.game.cache.getText('level' + this.currentLevel));
 
     this.endOfLevelTimer = this.time.events.add(this.levelData.duration * 1000, () => {
+      this.orchestra.stop();
 
       if (this.currentLevel < this.numLevels) {
         this.currentLevel++;
